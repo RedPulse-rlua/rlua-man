@@ -75,6 +75,7 @@
 
     bottomNav.style.display = logged ? '' : 'none';
     $('bnavAdmin').style.display = logged && me?.role === 'admin' ? '' : 'none';
+    if (logged) startVerifyPoll(); else clearInterval(pendingVerifyPoll);
     if (!logged) navigate('lobby');
   }
 
@@ -582,6 +583,142 @@
     });
   }
 
+  /* ===== 2FA Verification ===== */
+  let verifyPollTimer = null;
+
+  function showVerifyWaiting(verifyId) {
+    clearInterval(verifyPollTimer);
+    app.innerHTML = `
+      <div class="page">
+        <div class="top-bar">
+          <a href="#" class="logo" onclick="event.preventDefault()">rl<span>ua</span></a>
+          <div class="top-actions"></div>
+        </div>
+        <div class="container" style="text-align:center;padding-top:40px">
+          <div class="spinner" style="margin:0 auto 20px"></div>
+          <h2 style="font-size:18px;margin-bottom:8px">Ожидание подтверждения</h2>
+          <p style="color:var(--muted);font-size:14px;margin-bottom:20px">Откройте rlua на основном устройстве и подтвердите вход</p>
+          <div id="verifyStatus" style="font-size:13px;color:var(--muted)">Запрос отправлен...</div>
+          <button class="btn btn-ghost" style="margin-top:20px" id="verifyCancel">Отмена</button>
+        </div>
+      </div>`;
+
+    $('verifyCancel')?.addEventListener('click', () => {
+      clearInterval(verifyPollTimer);
+      navigate('lobby');
+    });
+
+    verifyPollTimer = setInterval(async () => {
+      try {
+        const data = await api('/api/verify/complete', { method: 'POST', body: JSON.stringify({ id: verifyId, code: '' }) });
+        if (data.ok && data.token) {
+          clearInterval(verifyPollTimer);
+          saveSession(data.username, data.token);
+          await refreshAuth();
+          navigate('lobby');
+          toast('Вход выполнен!');
+        }
+      } catch (err) {
+        if (err.message.includes('отклонён')) {
+          clearInterval(verifyPollTimer);
+          $('verifyStatus').textContent = 'Вход отклонён владельцем аккаунта';
+          $('verifyStatus').style.color = 'var(--danger)';
+          setTimeout(() => navigate('lobby'), 3000);
+        } else if (err.message.includes('Ожидание')) {
+          $('verifyStatus').textContent = 'Ожидание подтверждения...';
+        }
+      }
+    }, 3000);
+  }
+
+  function showVerifyRequest(rec) {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.id = 'verifyOverlay';
+    overlay.innerHTML = `
+      <div class="modal" style="max-width:400px">
+        <div style="text-align:center;margin-bottom:16px">
+          <div style="font-size:48px;margin-bottom:8px">🔐</div>
+          <h2 style="font-size:18px;font-weight:700">Новый вход в аккаунт</h2>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px">
+          <div style="font-size:13px;color:var(--muted);margin-bottom:6px">Устройство</div>
+          <div style="font-size:14px;font-weight:600">${esc(rec.device || 'Неизвестно')}</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:8px;margin-bottom:6px">IP</div>
+          <div style="font-size:14px;font-weight:600;font-family:var(--font-mono)">${esc(rec.ip || '?')}</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:8px;margin-bottom:6px">Это вы?</div>
+        </div>
+        <div id="verifyCodeSection" style="display:none;margin-bottom:16px">
+          <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Код подтверждения (6 цифр)</label>
+          <input id="verifyCodeInput" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="######" style="width:100%;padding:14px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-size:24px;font-family:var(--font-mono);text-align:center;letter-spacing:6px;font-weight:700">
+          <p class="form-error hidden" id="verifyCodeError"></p>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary" style="flex:1" id="verifyShowCode">Это я</button>
+          <button class="btn btn-danger" style="flex:1" id="verifyReject">Не я</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+
+    let currentCode = null;
+
+    $('verifyShowCode')?.addEventListener('click', async () => {
+      try {
+        const data = await api('/api/verify/code', { method: 'POST', body: JSON.stringify({ id: rec.id }) });
+        currentCode = data.code;
+        $('verifyCodeSection').style.display = '';
+        $('verifyShowCode').textContent = 'Подтвердить';
+        $('verifyShowCode').removeEventListener('click', arguments.callee);
+        $('verifyShowCode').addEventListener('click', async () => {
+          const input = $('verifyCodeInput')?.value?.trim();
+          if (!input || input !== currentCode) {
+            $('verifyCodeError').textContent = 'Неверный код';
+            $('verifyCodeError').classList.remove('hidden');
+            return;
+          }
+          try {
+            await api('/api/verify/confirm', { method: 'POST', body: JSON.stringify({ id: rec.id, action: 'confirm', code: input }) });
+            overlay.remove();
+            toast('Вход подтверждён!');
+          } catch (e) {
+            $('verifyCodeError').textContent = e.message;
+            $('verifyCodeError').classList.remove('hidden');
+          }
+        });
+      } catch (e) { toast(e.message); }
+    });
+
+    $('verifyReject')?.addEventListener('click', async () => {
+      if (!confirm('Заблокировать это устройство?')) return;
+      try {
+        await api('/api/verify/confirm', { method: 'POST', body: JSON.stringify({ id: rec.id, action: 'reject' }) });
+        overlay.remove();
+        toast('Устройство заблокировано');
+      } catch (e) { toast(e.message); }
+    });
+
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  }
+
+  let pendingVerifyPoll = null;
+  function startVerifyPoll() {
+    clearInterval(pendingVerifyPoll);
+    pendingVerifyPoll = setInterval(async () => {
+      if (!me) { clearInterval(pendingVerifyPoll); return; }
+      try {
+        const data = await api('/api/verify/pending');
+        if (data.ok && data.pending?.length) {
+          for (const rec of data.pending) {
+            if (!document.getElementById('verifyOverlay')) {
+              showVerifyRequest(rec);
+              break;
+            }
+          }
+        }
+      } catch {}
+    }, 5000);
+  }
+
   /* ===== Auth handlers ===== */
   window._showLogin = () => showModal('login');
   window._showReg = () => showModal('register');
@@ -597,6 +734,11 @@
         word: $('loginWord').value,
         password: $('loginPassword').value,
       })});
+      if (data.needsVerification) {
+        closeModal();
+        showVerifyWaiting(data.verifyId);
+        return;
+      }
       saveSession(data.username, data.token);
       closeModal();
       $('loginForm').reset();
