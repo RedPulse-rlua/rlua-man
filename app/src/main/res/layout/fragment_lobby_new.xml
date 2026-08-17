@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="LOBBY"
+            android:textColor="@color/text"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@color/card"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/lobbyAvatar"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="@color/accent"
+                    android:fontFamily="monospace"
+                    android:gravity="center"
+                    android:text="--"
+                    android:textColor="@color/text"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/lobbyName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/text"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/adminBadge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="20dp"
+                            android:layout_marginStart="8dp"
+                            android:background="@color/accent"
+                            android:gravity="center"
+                            android:paddingHorizontal="8dp"
+                            android:text="ADMIN"
+                            android:textColor="@color/text"
+                            android:textSize="10sp"
+                            android:textStyle="bold"
+                            android:visibility="gone" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/lobbyDate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textColor="@color/text2"
+                        android:textSize="13sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="16dp"
+                android:background="@color/border" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ID"
+                        android:textColor="@color/muted"
+                        android:textSize="11sp" />
+
+                    <TextView
+                        android:id="@+id/lobbyId"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="--"
+                        android:textColor="@color/text"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="40dp"
+                    android:background="@color/border" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="РОЛЬ"
+                        android:textColor="@color/muted"
+                        android:textSize="11sp" />
+
+                    <TextView
+                        android:id="@+id/lobbyRole"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="--"
+                        android:textColor="@color/text"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="40dp"
+                    android:background="@color/border" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="СКРИПТЫ"
+                        android:textColor="@color/muted"
+                        android:textSize="11sp" />
+
+                    <TextView
+                        android:id="@+id/lobbyScripts"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="@color/accent"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="16dp"
+                android:background="@color/border" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="На rlua"
+                android:textColor="@color/muted"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/lobbyDays"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="--"
+                android:textColor="@color/text"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/btnLogout"
+                android:layout_width="wrap_content"
+                android:layout_height="44dp"
+                android:layout_marginTop="24dp"
+                android:background="@color/card"
+                android:gravity="center"
+                android:paddingHorizontal="24dp"
+                android:text="Выйти"
+                android:textColor="@color/danger"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="48dp"
+            android:fontFamily="monospace"
+            android:text="rlua"
+            android:textAlignment="center"
+            android:textColor="@color/muted"
+            android:textSize="12sp" />
+    </LinearLayout>
+</ScrollView>
