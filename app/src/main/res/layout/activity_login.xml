@@ -1,274 +1,230 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0A0A0F"
-    android:padding="24dp">
-
-    <TextView
-        android:id="@+id/logoText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="80dp"
-        android:fontFamily="monospace"
-        android:text="rl"
-        android:textColor="#E8E8F0"
-        android:textSize="48sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/logoAccent"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="monospace"
-        android:text="ua"
-        android:textColor="#6C5CE7"
-        android:textSize="48sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toEndOf="@id/logoText"
-        app:layout_constraintTop_toTopOf="@id/logoText" />
-
-    <TextView
-        android:id="@+id/errorText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:textAlignment="center"
-        android:textColor="#FF2B2B"
-        android:textSize="14sp"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/logoText" />
-
-    <TextView
-        android:id="@+id/successText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:textAlignment="center"
-        android:textColor="#00E676"
-        android:textSize="14sp"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/logoText" />
+    android:background="#0A0505"
+    android:fillViewport="true"
+    android:fitsSystemWindows="true">
 
     <LinearLayout
-        android:id="@+id/loginForm"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+        android:gravity="center_horizontal"
         android:orientation="vertical"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/errorText">
+        android:padding="32dp">
 
-        <com.google.android.material.textfield.TextInputLayout
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="60dp"
+            android:fontFamily="monospace"
+            android:text="rl"
+            android:textColor="#F4E8E8"
+            android:textSize="42sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="rlua"
+            android:textColor="#A37C7C"
+            android:textSize="14sp" />
+
+        <!-- Auth form -->
+        <LinearLayout
+            android:id="@+id/authSection"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Ник"
-            app:boxBackgroundColor="#16161F"
-            app:boxCornerRadiusBottomEnd="12dp"
-            app:boxCornerRadiusBottomStart="12dp"
-            app:boxCornerRadiusTopEnd="12dp"
-            app:boxCornerRadiusTopStart="12dp"
-            app:boxStrokeColor="#2A2A38"
-            app:hintTextColor="#606070">
+            android:layout_marginTop="48dp"
+            android:orientation="vertical">
 
-            <com.google.android.material.textfield.TextInputEditText
+            <EditText
                 android:id="@+id/inputUsername"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="52dp"
+                android:background="#1A0B0B"
+                android:hint="Ник"
+                android:importantForAutofill="no"
                 android:inputType="text"
-                android:textColor="#E8E8F0" />
-        </com.google.android.material.textfield.TextInputLayout>
+                android:maxLines="1"
+                android:paddingHorizontal="16dp"
+                android:textColor="#F4E8E8"
+                android:textColorHint="#5A3A3A"
+                android:textSize="15sp" />
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:hint="Секретное слово"
-            app:boxBackgroundColor="#16161F"
-            app:boxCornerRadiusBottomEnd="12dp"
-            app:boxCornerRadiusBottomStart="12dp"
-            app:boxCornerRadiusTopEnd="12dp"
-            app:boxCornerRadiusTopStart="12dp"
-            app:boxStrokeColor="#2A2A38"
-            app:endIconMode="password_toggle"
-            app:hintTextColor="#606070">
-
-            <com.google.android.material.textfield.TextInputEditText
+            <EditText
                 android:id="@+id/inputWord"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textPassword"
-                android:textColor="#E8E8F0" />
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_height="52dp"
+                android:layout_marginTop="8dp"
+                android:background="#1A0B0B"
+                android:hint="Секретное слово"
+                android:importantForAutofill="no"
+                android:inputType="text"
+                android:maxLines="1"
+                android:paddingHorizontal="16dp"
+                android:textColor="#F4E8E8"
+                android:textColorHint="#5A3A3A"
+                android:textSize="15sp" />
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:hint="Пароль"
-            app:boxBackgroundColor="#16161F"
-            app:boxCornerRadiusBottomEnd="12dp"
-            app:boxCornerRadiusBottomStart="12dp"
-            app:boxCornerRadiusTopEnd="12dp"
-            app:boxCornerRadiusTopStart="12dp"
-            app:boxStrokeColor="#2A2A38"
-            app:endIconMode="password_toggle"
-            app:hintTextColor="#606070">
-
-            <com.google.android.material.textfield.TextInputEditText
+            <EditText
                 android:id="@+id/inputPassword"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="52dp"
+                android:layout_marginTop="8dp"
+                android:background="#1A0B0B"
+                android:hint="Пароль"
+                android:importantForAutofill="no"
                 android:inputType="textPassword"
-                android:textColor="#E8E8F0" />
-        </com.google.android.material.textfield.TextInputLayout>
+                android:maxLines="1"
+                android:paddingHorizontal="16dp"
+                android:textColor="#F4E8E8"
+                android:textColorHint="#5A3A3A"
+                android:textSize="15sp" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnLogin"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="20dp"
-            android:text="Войти"
-            android:textAllCaps="false"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            app:backgroundTint="#6C5CE7"
-            app:cornerRadius="12dp" />
+            <TextView
+                android:id="@+id/errorText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="#FF5C7A"
+                android:textSize="13sp"
+                android:visibility="gone" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSwitchToRegister"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            <TextView
+                android:id="@+id/successText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="#4ADE80"
+                android:textSize="13sp"
+                android:visibility="gone" />
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginTop="12dp"
+                android:indeterminateTint="#FF2D2D"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/btnLogin"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="16dp"
+                android:background="#FF2D2D"
+                android:gravity="center"
+                android:text="Войти"
+                android:textColor="#F4E8E8"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/btnRegister"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="8dp"
+                android:background="#1A0B0B"
+                android:gravity="center"
+                android:text="Создать аккаунт"
+                android:textColor="#A37C7C"
+                android:textSize="16sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="40dp"
+                android:text="rlua"
+                android:textColor="#5A3A3A"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- 2FA waiting screen -->
+        <LinearLayout
+            android:id="@+id/verifySection"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="8dp"
-            android:text="Создать аккаунт"
-            android:textAllCaps="false"
-            android:textColor="#E8E8F0"
-            android:textSize="14sp"
-            app:cornerRadius="12dp"
-            app:strokeColor="#2A2A38"
-            app:strokeWidth="1dp" />
+            android:layout_height="wrap_content"
+            android:layout_marginTop="48dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ПОДТВЕРЖДЕНИЕ"
+                android:textColor="#F4E8E8"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/verifyDesc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Подтвердите вход на основном устройстве"
+                android:textAlignment="center"
+                android:textColor="#A37C7C"
+                android:textSize="14sp" />
+
+            <ProgressBar
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="24dp"
+                android:indeterminateTint="#FF2D2D" />
+
+            <TextView
+                android:id="@+id/verifyStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Ожидание подтверждения..."
+                android:textAlignment="center"
+                android:textColor="#5A3A3A"
+                android:textSize="13sp" />
+
+            <EditText
+                android:id="@+id/inputCode"
+                android:layout_width="200dp"
+                android:layout_height="52dp"
+                android:layout_marginTop="24dp"
+                android:background="#1A0B0B"
+                android:gravity="center"
+                android:hint="Код из приложения"
+                android:importantForAutofill="no"
+                android:inputType="number"
+                android:maxLength="6"
+                android:textColor="#F4E8E8"
+                android:textColorHint="#5A3A3A"
+                android:textSize="24sp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/btnSubmitCode"
+                android:layout_width="200dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:background="#FF2D2D"
+                android:gravity="center"
+                android:text="Подтвердить"
+                android:textColor="#F4E8E8"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/btnVerifyCancel"
+                android:layout_width="200dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:background="#1A0B0B"
+                android:gravity="center"
+                android:text="Отмена"
+                android:textColor="#A37C7C"
+                android:textSize="14sp" />
+        </LinearLayout>
+
     </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/registerForm"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:orientation="vertical"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/errorText">
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Ник"
-            app:boxBackgroundColor="#16161F"
-            app:boxCornerRadiusBottomEnd="12dp"
-            app:boxCornerRadiusBottomStart="12dp"
-            app:boxCornerRadiusTopEnd="12dp"
-            app:boxCornerRadiusTopStart="12dp"
-            app:boxStrokeColor="#2A2A38"
-            app:hintTextColor="#606070">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/regUsername"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="text"
-                android:textColor="#E8E8F0" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:hint="Секретное слово"
-            app:boxBackgroundColor="#16161F"
-            app:boxCornerRadiusBottomEnd="12dp"
-            app:boxCornerRadiusBottomStart="12dp"
-            app:boxCornerRadiusTopEnd="12dp"
-            app:boxCornerRadiusTopStart="12dp"
-            app:boxStrokeColor="#2A2A38"
-            app:endIconMode="password_toggle"
-            app:hintTextColor="#606070">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/regWord"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textPassword"
-                android:textColor="#E8E8F0" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:hint="Пароль"
-            app:boxBackgroundColor="#16161F"
-            app:boxCornerRadiusBottomEnd="12dp"
-            app:boxCornerRadiusBottomStart="12dp"
-            app:boxCornerRadiusTopEnd="12dp"
-            app:boxCornerRadiusTopStart="12dp"
-            app:boxStrokeColor="#2A2A38"
-            app:endIconMode="password_toggle"
-            app:hintTextColor="#606070">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/regPassword"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textPassword"
-                android:textColor="#E8E8F0" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnRegister"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="20dp"
-            android:text="Создать аккаунт"
-            android:textAllCaps="false"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            app:backgroundTint="#6C5CE7"
-            app:cornerRadius="12dp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSwitchToLogin"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="8dp"
-            android:text="Войти"
-            android:textAllCaps="false"
-            android:textColor="#E8E8F0"
-            android:textSize="14sp"
-            app:cornerRadius="12dp"
-            app:strokeColor="#2A2A38"
-            app:strokeWidth="1dp" />
-    </LinearLayout>
-
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:indeterminateTint="#6C5CE7"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/loginForm" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
