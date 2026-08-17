@@ -1,16 +1,30 @@
 package com.rlua.man.api
 
 import android.content.Context
-import android.content.SharedPreferences
 
 object SessionManager {
-    private const val PREFS = "rlua_session"
-    private fun prefs(ctx: Context): SharedPreferences = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-    fun save(ctx: Context, token: String, username: String, role: String, id: Int) { prefs(ctx).edit().apply { putString("token", token); putString("username", username); putString("role", role); putInt("user_id", id); apply() } }
-    fun token(ctx: Context): String? = prefs(ctx).getString("token", null)
-    fun username(ctx: Context): String? = prefs(ctx).getString("username", null)
-    fun role(ctx: Context): String? = prefs(ctx).getString("role", null)
-    fun userId(ctx: Context): Int = prefs(ctx).getInt("user_id", 0)
-    fun clear(ctx: Context) { prefs(ctx).edit().clear().apply() }
-    fun isLoggedIn(ctx: Context): Boolean = token(ctx) != null
+    private const val PREF = "rlua_session"
+    private const val KEY_TOKEN = "token"
+    private const val KEY_USERNAME = "username"
+    private const val KEY_ROLE = "role"
+    private const val KEY_ID = "id"
+
+    fun save(ctx: Context, token: String?, username: String?, role: String?, id: Int) {
+        ctx.getSharedPreferences(PREF, Context.MODE_PRIVATE).edit().apply {
+            putString(KEY_TOKEN, token)
+            putString(KEY_USERNAME, username)
+            putString(KEY_ROLE, role)
+            putInt(KEY_ID, id)
+            apply()
+        }
+    }
+
+    fun token(ctx: Context) = ctx.getSharedPreferences(PREF, Context.MODE_PRIVATE).getString(KEY_TOKEN, null)
+    fun username(ctx: Context) = ctx.getSharedPreferences(PREF, Context.MODE_PRIVATE).getString(KEY_USERNAME, null)
+    fun role(ctx: Context) = ctx.getSharedPreferences(PREF, Context.MODE_PRIVATE).getString(KEY_ROLE, null)
+    fun id(ctx: Context) = ctx.getSharedPreferences(PREF, Context.MODE_PRIVATE).getInt(KEY_ID, 0)
+
+    fun clear(ctx: Context) {
+        ctx.getSharedPreferences(PREF, Context.MODE_PRIVATE).edit().clear().apply()
+    }
 }
