@@ -84,7 +84,7 @@ class VerifyActivity : AppCompatActivity() {
                     if (pending.length() > 0) {
                         b.progressVerify.visibility = View.GONE
                         b.pendingList.visibility = View.VISIBLE
-                        b.pendingList.layoutManager = this@VerifyActivity
+                        b.pendingList.layoutManager = LinearLayoutManager(this@VerifyActivity)
                         b.pendingList.adapter = PendingAdapter(pending, token)
                     } else {
                         b.verifySubtitle.text = "Ожидание нового входа..."
