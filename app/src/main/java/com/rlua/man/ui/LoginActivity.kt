@@ -31,8 +31,8 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var btnRegister: TextView
     private lateinit var btnSubmitCode: TextView
     private lateinit var verifyStatus: TextView
-    private val handler = Handler(Looper.getMainLooper())
-    private var activePoll: Runnable? = null
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private var pollRunning = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,7 +56,9 @@ class LoginActivity : AppCompatActivity() {
         btnRegister.setOnClickListener { doRegister() }
 
         findViewById<TextView>(R.id.btnVerifyCancel).setOnClickListener {
-            cancelVerify()
+            pollRunning = false
+            verifySection.visibility = View.GONE
+            authSection.visibility = View.VISIBLE
         }
 
         btnSubmitCode.setOnClickListener {
@@ -114,46 +116,35 @@ class LoginActivity : AppCompatActivity() {
         inputCode.visibility = View.GONE
         btnSubmitCode.visibility = View.GONE
         inputCode.text.clear()
-        startVerifyPoll(verifyId)
+        pollRunning = true
+        pollVerify(verifyId)
     }
 
-    private fun startVerifyPoll(verifyId: String) {
-        cancelVerify()
-        val poll = object : Runnable {
-            override fun run() {
-                lifecycleScope.launch {
-                    try {
-                        val res = withContext(Dispatchers.IO) {
-                            ApiClient.verifyComplete(verifyId, "")
-                        }
-                        if (res.optBoolean("ok") && res.has("token")) {
-                            cancelVerify()
-                            SessionManager.save(this@LoginActivity, res.optString("token"), res.optString("username"), res.optString("role", "user"), res.optInt("id", 0))
-                            navigateToLobby(); return@launch
-                        }
-                        val err = res.optString("error", "")
-                        if (err.contains("отклонён")) {
-                            cancelVerify()
-                            verifyStatus.text = "Вход отклонён владельцем аккаунта"; return@launch
-                        }
-                        if (err.contains("нужен код") || err.contains("code")) {
-                            cancelVerify()
-                            verifyStatus.text = "Введите код из основного устройства"
-                            inputCode.visibility = View.VISIBLE
-                            btnSubmitCode.visibility = View.VISIBLE; return@launch
-                        }
-                    } catch (_: Exception) {}
-                    handler.postDelayed(this, 3000)
+    private fun pollVerify(verifyId: String) {
+        if (!pollRunning) return
+        lifecycleScope.launch {
+            try {
+                val res = withContext(Dispatchers.IO) { ApiClient.verifyComplete(verifyId, "") }
+                if (!pollRunning) return@launch
+                if (res.optBoolean("ok") && res.has("token")) {
+                    pollRunning = false
+                    SessionManager.save(this@LoginActivity, res.optString("token"), res.optString("username"), res.optString("role", "user"), res.optInt("id", 0))
+                    navigateToLobby(); return@launch
                 }
-            }
+                val err = res.optString("error", "")
+                if (err.contains("отклонён")) {
+                    pollRunning = false
+                    verifyStatus.text = "Вход отклонён владельцем аккаунта"; return@launch
+                }
+                if (err.contains("нужен код") || err.contains("code")) {
+                    pollRunning = false
+                    verifyStatus.text = "Введите код из основного устройства"
+                    inputCode.visibility = View.VISIBLE
+                    btnSubmitCode.visibility = View.VISIBLE; return@launch
+                }
+            } catch (_: Exception) {}
+            if (pollRunning) mainHandler.postDelayed({ pollVerify(verifyId) }, 3000)
         }
-        activePoll = poll
-        handler.post(poll)
-    }
-
-    private fun cancelVerify() {
-        activePoll?.let { handler.removeCallbacks(it) }
-        activePoll = null
     }
 
     private fun submitCode(verifyId: String, code: String) {
@@ -163,7 +154,6 @@ class LoginActivity : AppCompatActivity() {
                 val res = withContext(Dispatchers.IO) { ApiClient.verifyComplete(verifyId, code) }
                 btnSubmitCode.isEnabled = true
                 if (res.optBoolean("ok") && res.has("token")) {
-                    cancelVerify()
                     SessionManager.save(this@LoginActivity, res.optString("token"), res.optString("username"), res.optString("role", "user"), res.optInt("id", 0))
                     navigateToLobby(); return@launch
                 }
@@ -174,7 +164,7 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        cancelVerify()
+        pollRunning = false
     }
 
     private fun navigateToLobby() { startActivity(Intent(this, LobbyActivity::class.java)); finish() }
