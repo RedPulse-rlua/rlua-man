@@ -10,7 +10,7 @@ import com.rlua.man.api.ApiClient
 import com.rlua.man.api.SessionManager
 import com.rlua.man.databinding.ActivityLobbyBinding
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.lifecycle.lifecycleScope
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
