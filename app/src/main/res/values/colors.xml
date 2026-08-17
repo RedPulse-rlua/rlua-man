@@ -10,4 +10,5 @@
     <color name="accent">#FF2D2D</color>
     <color name="accent_dim">#E00000</color>
     <color name="danger">#FF5C7A</color>
+    <color name="nav_item">#A37C7C</color>
 </resources>
