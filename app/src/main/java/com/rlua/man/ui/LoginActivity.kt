@@ -17,21 +17,33 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        b = ActivityLoginBinding.inflate(layoutInflater)
+        setContentView(b.root)
+
         if (SessionManager.isLoggedIn(this)) {
             lifecycleScope.launch {
                 try {
                     val res = withContext(Dispatchers.IO) { ApiClient.me(SessionManager.token(this@LoginActivity)!!) }
-                    if (res.optBoolean("ok") && !res.isNull("user")) { navigateToLobby(); return@launch }
+                    if (res.optBoolean("ok") && !res.isNull("user")) {
+                        navigateToLobby(); return@launch
+                    }
                 } catch (_: Exception) {}
                 SessionManager.clear(this@LoginActivity)
             }
         }
-        b = ActivityLoginBinding.inflate(layoutInflater)
-        setContentView(b.root)
+
         b.btnLogin.setOnClickListener { doLogin() }
         b.btnRegister.setOnClickListener { doRegister() }
-        b.btnSwitchToRegister.setOnClickListener { b.loginForm.visibility = View.GONE; b.registerForm.visibility = View.VISIBLE; hideError(); hideSuccess() }
-        b.btnSwitchToLogin.setOnClickListener { b.loginForm.visibility = View.VISIBLE; b.registerForm.visibility = View.GONE; hideError(); hideSuccess() }
+        b.btnSwitchToRegister.setOnClickListener {
+            b.loginForm.visibility = View.GONE
+            b.registerForm.visibility = View.VISIBLE
+            hideError(); hideSuccess()
+        }
+        b.btnSwitchToLogin.setOnClickListener {
+            b.loginForm.visibility = View.VISIBLE
+            b.registerForm.visibility = View.GONE
+            hideError(); hideSuccess()
+        }
     }
 
     private fun doLogin() {
@@ -45,13 +57,13 @@ class LoginActivity : AppCompatActivity() {
                 val res = withContext(Dispatchers.IO) { ApiClient.login(u, w, p) }
                 setLoading(false)
                 if (!res.optBoolean("ok")) { showError(res.optString("error", "Ошибка")); return@launch }
+
                 if (res.optBoolean("needsVerification")) {
-                    showSuccess(res.optString("message", "Ожидание подтверждения..."))
-                    startActivity(Intent(this@LoginActivity, VerifyActivity::class.java).apply {
-                        putExtra("verifyId", res.optString("verifyId", ""))
-                        putExtra("is_new_device", true)
-                    }); return@launch
+                    val vid = res.optString("verifyId", "")
+                    showSuccess("Ожидание подтверждения на основном устройстве...")
+                    startVerifyPoll(vid); return@launch
                 }
+
                 SessionManager.save(this@LoginActivity, res.optString("token"), res.optString("username"), res.optString("role", "user"), res.optInt("id", 0))
                 navigateToLobby()
             } catch (e: Exception) { setLoading(false); showError("Ошибка сети: ${e.message}") }
@@ -73,6 +85,28 @@ class LoginActivity : AppCompatActivity() {
                 navigateToLobby()
             } catch (e: Exception) { setLoading(false); showError("Ошибка сети: ${e.message}") }
         }
+    }
+
+    private fun startVerifyPoll(verifyId: String) {
+        val handler = android.os.Handler(mainLooper)
+        val runnable = object : Runnable {
+            override fun run() {
+                lifecycleScope.launch {
+                    try {
+                        val res = withContext(Dispatchers.IO) { ApiClient.verifyComplete(verifyId, "") }
+                        if (res.optBoolean("ok") && res.has("token")) {
+                            SessionManager.save(this@LoginActivity, res.optString("token"), res.optString("username"), res.optString("role", "user"), res.optInt("id", 0))
+                            navigateToLobby(); return@launch
+                        }
+                        if (res.optString("error", "").contains("отклонён")) {
+                            showError("Вход отклонён"); return@launch
+                        }
+                    } catch (_: Exception) {}
+                    handler.postDelayed(this, 3000)
+                }
+            }
+        }
+        handler.post(runnable)
     }
 
     private fun navigateToLobby() { startActivity(Intent(this, LobbyActivity::class.java)); finish() }
