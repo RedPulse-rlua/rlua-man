@@ -9,7 +9,16 @@ import java.util.concurrent.TimeUnit
 
 object ApiClient {
     private const val BASE = "https://rlua.pages.dev"
-    private val client = OkHttpClient.Builder().connectTimeout(15, TimeUnit.SECONDS).readTimeout(15, TimeUnit.SECONDS).build()
+    private val client = OkHttpClient.Builder()
+        .connectTimeout(15, TimeUnit.SECONDS)
+        .readTimeout(15, TimeUnit.SECONDS)
+        .addInterceptor { chain ->
+            val req = chain.request().newBuilder()
+                .header("User-Agent", "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36")
+                .build()
+            chain.proceed(req)
+        }
+        .build()
     private val JSON_TYPE = "application/json; charset=utf-8".toMediaType()
 
     fun get(path: String, token: String? = null): JSONObject {
