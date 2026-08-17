@@ -125,14 +125,14 @@ class LoginActivity : AppCompatActivity() {
                     SessionManager.save(this@LoginActivity, res.optString("token"), res.optString("username"), res.optString("role", "user"), res.optInt("id", 0))
                     goMain(); return@launch
                 }
-                val err = res.optString("error", "")
-                if (err.contains("отклонён")) { pollRunning = false; verifyStatus.text = "Вход отклонён"; return@launch }
-                if (err.contains("нужен код") || err.contains("code")) {
+                if (res.optString("status") == "confirmed") {
                     pollRunning = false
-                    verifyStatus.text = "Введите код из основного устройства"
+                    verifyStatus.text = "Подтверждено! Введи 6-значный код из MAIL"
                     inputCode.visibility = View.VISIBLE
                     btnSubmitCode.visibility = View.VISIBLE; return@launch
                 }
+                val err = res.optString("error", "")
+                if (err.contains("отклонён") || err.contains("заблокирован")) { pollRunning = false; verifyStatus.text = "Вход отклонён"; return@launch }
             } catch (_: Exception) {}
             if (pollRunning) mainHandler.postDelayed({ pollVerify(verifyId) }, 3000)
         }

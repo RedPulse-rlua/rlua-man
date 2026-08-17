@@ -86,9 +86,21 @@ class MailFragment : Fragment() {
         val username = item.optString("username", "?")
         val ip = item.optString("ip", "?")
         val device = item.optString("device", "Устройство")
+        val status = item.optString("status", "pending")
+        val code = item.optString("code", "")
+        val attempts = item.optInt("attempts", 0)
         val createdAt = item.optLong("createdAt", 0)
         val ago = ((System.currentTimeMillis() - createdAt) / 1000).toInt()
         val agoStr = if (ago < 60) "${ago}с" else "${ago / 60}м"
+        val isConfirmed = status == "confirmed"
+        val isRejected = status == "rejected"
+        val statusText = when {
+            isConfirmed && attempts > 0 -> "Код введён неверно, осталось ${3 - attempts} попытки"
+            isConfirmed -> "Код действует 5 минут"
+            isRejected && attempts >= 3 -> "Код введён неверно 3 раза — вход заблокирован"
+            isRejected -> "Запрос отклонён"
+            else -> "Ждёт подтверждения"
+        }
 
         val avatar = TextView(ctx).apply {
             text = username.take(2).uppercase()
@@ -122,11 +134,17 @@ class MailFragment : Fragment() {
 
         info.addView(nameView)
         info.addView(metaView)
+        val statusView = TextView(ctx).apply {
+            text = statusText
+            setTextColor(if (isConfirmed) Color.parseColor("#FF2D2D") else if (isRejected) Color.parseColor("#FF4B4B") else Color.parseColor("#A37C7C"))
+            textSize = 11f
+        }
+        info.addView(statusView)
 
         val codeView = TextView(ctx).apply {
-            text = "••••••"
+            text = if (isConfirmed) code else "••••••"
             setTextColor(Color.parseColor("#FF2D2D"))
-            textSize = 18f
+            textSize = if (isConfirmed) 22f else 18f
             typeface = android.graphics.Typeface.MONOSPACE
             val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
             lp.marginStart = 16
@@ -154,21 +172,27 @@ class MailFragment : Fragment() {
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
         }
 
+        if (isConfirmed || isRejected) {
+            confirmBtn.visibility = View.GONE
+        }
+        if (isRejected) {
+            rejectBtn.visibility = View.GONE
+            card.alpha = 0.6f
+        }
+
         confirmBtn.setOnClickListener {
             confirmBtn.isEnabled = false
             rejectBtn.isEnabled = false
             lifecycleScope.launch {
                 try {
-                    val codeRes = withContext(Dispatchers.IO) { ApiClient.verifyCode(token, id) }
-                    if (codeRes.optBoolean("ok")) {
-                        codeView.text = codeRes.optString("code", "???")
+                    val res = withContext(Dispatchers.IO) { ApiClient.verifyConfirm(token, id, "confirm") }
+                    if (res.optBoolean("ok")) {
+                        codeView.text = res.optString("code", code).ifEmpty { code }
+                        codeView.textSize = 22f
+                        statusView.text = "Код действует 5 минут"
+                        statusView.setTextColor(Color.parseColor("#FF2D2D"))
+                        confirmBtn.visibility = View.GONE
                     }
-                } catch (_: Exception) {}
-                kotlinx.coroutines.delay(1500)
-                try {
-                    val code = codeView.text.toString()
-                    withContext(Dispatchers.IO) { ApiClient.verifyConfirm(token, id, "confirm", code) }
-                    list.removeView(card)
                 } catch (_: Exception) {}
             }
         }
