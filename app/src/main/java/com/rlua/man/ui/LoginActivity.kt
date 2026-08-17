@@ -2,68 +2,90 @@ package com.rlua.man.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
+import android.widget.EditText
+import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.rlua.man.R
 import com.rlua.man.api.ApiClient
 import com.rlua.man.api.SessionManager
-import com.rlua.man.databinding.ActivityLoginBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class LoginActivity : AppCompatActivity() {
-    private lateinit var b: ActivityLoginBinding
+    private lateinit var authSection: View
+    private lateinit var verifySection: View
+    private lateinit var inputUsername: EditText
+    private lateinit var inputWord: EditText
+    private lateinit var inputPassword: EditText
+    private lateinit var inputCode: EditText
+    private lateinit var errorText: TextView
+    private lateinit var successText: TextView
+    private lateinit var progressBar: ProgressBar
+    private lateinit var btnLogin: TextView
+    private lateinit var btnRegister: TextView
+    private lateinit var btnSubmitCode: TextView
+    private lateinit var verifyStatus: TextView
+    private val handler = Handler(Looper.getMainLooper())
+    private var verifyPollRunnable: Runnable? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        b = ActivityLoginBinding.inflate(layoutInflater)
-        setContentView(b.root)
+        setContentView(R.layout.activity_login)
 
-        if (SessionManager.isLoggedIn(this)) {
-            lifecycleScope.launch {
-                try {
-                    val res = withContext(Dispatchers.IO) { ApiClient.me(SessionManager.token(this@LoginActivity)!!) }
-                    if (res.optBoolean("ok") && !res.isNull("user")) {
-                        navigateToLobby(); return@launch
-                    }
-                } catch (_: Exception) {}
-                SessionManager.clear(this@LoginActivity)
-            }
+        authSection = findViewById(R.id.authSection)
+        verifySection = findViewById(R.id.verifySection)
+        inputUsername = findViewById(R.id.inputUsername)
+        inputWord = findViewById(R.id.inputWord)
+        inputPassword = findViewById(R.id.inputPassword)
+        inputCode = findViewById(R.id.inputCode)
+        errorText = findViewById(R.id.errorText)
+        successText = findViewById(R.id.successText)
+        progressBar = findViewById(R.id.progressBar)
+        btnLogin = findViewById(R.id.btnLogin)
+        btnRegister = findViewById(R.id.btnRegister)
+        btnSubmitCode = findViewById(R.id.btnSubmitCode)
+        verifyStatus = findViewById(R.id.verifyStatus)
+
+        btnLogin.setOnClickListener { doLogin() }
+        btnRegister.setOnClickListener { doRegister() }
+
+        findViewById<TextView>(R.id.btnVerifyCancel).setOnClickListener {
+            stopVerifyPoll()
+            verifySection.visibility = View.GONE
+            authSection.visibility = View.VISIBLE
         }
 
-        b.btnLogin.setOnClickListener { doLogin() }
-        b.btnRegister.setOnClickListener { doRegister() }
-        b.btnSwitchToRegister.setOnClickListener {
-            b.loginForm.visibility = View.GONE
-            b.registerForm.visibility = View.VISIBLE
-            hideError(); hideSuccess()
-        }
-        b.btnSwitchToLogin.setOnClickListener {
-            b.loginForm.visibility = View.VISIBLE
-            b.registerForm.visibility = View.GONE
-            hideError(); hideSuccess()
+        btnSubmitCode.setOnClickListener {
+            val code = inputCode.text.toString().trim()
+            if (code.length != 6) { showError("Введите 6-значный код"); return@setOnClickListener }
+            val vid = verifySection.tag as? String ?: return@setOnClickListener
+            submitCode(vid, code)
         }
     }
 
     private fun doLogin() {
-        val u = b.inputUsername.text.toString().trim()
-        val w = b.inputWord.text.toString()
-        val p = b.inputPassword.text.toString()
+        val u = inputUsername.text.toString().trim()
+        val w = inputWord.text.toString()
+        val p = inputPassword.text.toString()
         if (u.isEmpty() || w.isEmpty() || p.isEmpty()) { showError("Заполните все поля"); return }
-        setLoading(true)
+        setLoading(true); hideError()
         lifecycleScope.launch {
             try {
                 val res = withContext(Dispatchers.IO) { ApiClient.login(u, w, p) }
                 setLoading(false)
-                if (!res.optBoolean("ok")) { showError(res.optString("error", "Ошибка")); return@launch }
-
-                if (res.optBoolean("needsVerification")) {
-                    val vid = res.optString("verifyId", "")
-                    showSuccess("Ожидание подтверждения на основном устройстве...")
-                    startVerifyPoll(vid); return@launch
+                if (!res.optBoolean("ok")) {
+                    showError(res.optString("error", "Ошибка")); return@launch
                 }
-
+                if (res.optBoolean("needsVerification")) {
+                    val verifyId = res.optString("verifyId")
+                    showVerifyScreen(verifyId); return@launch
+                }
                 SessionManager.save(this@LoginActivity, res.optString("token"), res.optString("username"), res.optString("role", "user"), res.optInt("id", 0))
                 navigateToLobby()
             } catch (e: Exception) { setLoading(false); showError("Ошибка сети: ${e.message}") }
@@ -71,11 +93,11 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun doRegister() {
-        val u = b.regUsername.text.toString().trim()
-        val w = b.regWord.text.toString()
-        val p = b.regPassword.text.toString()
+        val u = inputUsername.text.toString().trim()
+        val w = inputWord.text.toString()
+        val p = inputPassword.text.toString()
         if (u.isEmpty() || w.isEmpty() || p.isEmpty()) { showError("Заполните все поля"); return }
-        setLoading(true)
+        setLoading(true); hideError()
         lifecycleScope.launch {
             try {
                 val res = withContext(Dispatchers.IO) { ApiClient.register(u, w, p) }
@@ -87,31 +109,79 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    private fun showVerifyScreen(verifyId: String) {
+        authSection.visibility = View.GONE
+        verifySection.visibility = View.VISIBLE
+        verifySection.tag = verifyId
+        verifyStatus.text = "Ожидание подтверждения..."
+        inputCode.visibility = View.GONE
+        btnSubmitCode.visibility = View.GONE
+        startVerifyPoll(verifyId)
+    }
+
     private fun startVerifyPoll(verifyId: String) {
-        val handler = android.os.Handler(mainLooper)
-        lateinit var poll: Runnable
-        poll = Runnable {
-            lifecycleScope.launch {
-                try {
-                    val res = withContext(Dispatchers.IO) { ApiClient.verifyComplete(verifyId, "") }
-                    if (res.optBoolean("ok") && res.has("token")) {
-                        SessionManager.save(this@LoginActivity, res.optString("token"), res.optString("username"), res.optString("role", "user"), res.optInt("id", 0))
-                        navigateToLobby(); return@launch
-                    }
-                    if (res.optString("error", "").contains("отклонён")) {
-                        showError("Вход отклонён"); return@launch
-                    }
-                } catch (_: Exception) {}
-                handler.postDelayed(poll, 3000)
+        stopVerifyPoll()
+        verifyPollRunnable = object : Runnable {
+            override fun run() {
+                lifecycleScope.launch {
+                    try {
+                        val res = withContext(Dispatchers.IO) {
+                            ApiClient.verifyComplete(verifyId, inputCode.text.toString().trim())
+                        }
+                        if (res.optBoolean("ok") && res.has("token")) {
+                            stopVerifyPoll()
+                            SessionManager.save(this@LoginActivity, res.optString("token"), res.optString("username"), res.optString("role", "user"), res.optInt("id", 0))
+                            navigateToLobby(); return@launch
+                        }
+                        if (res.optString("error", "").contains("отклонён")) {
+                            stopVerifyPoll()
+                            verifyStatus.text = "Вход отклонён владельцем аккаунта"
+                            return@launch
+                        }
+                        if (res.optString("error", "").contains("нужен код")) {
+                            stopVerifyPoll()
+                            verifyStatus.text = "Введите код из основного устройства"
+                            inputCode.visibility = View.VISIBLE
+                            btnSubmitCode.visibility = View.VISIBLE
+                            return@launch
+                        }
+                    } catch (_: Exception) {}
+                    handler.postDelayed(this, 3000)
+                }
             }
         }
-        handler.post(poll)
+        handler.post(verifyPollRunnable!!)
+    }
+
+    private fun stopVerifyPoll() {
+        verifyPollRunnable?.let { handler.removeCallbacks(it) }
+        verifyPollRunnable = null
+    }
+
+    private fun submitCode(verifyId: String, code: String) {
+        btnSubmitCode.isEnabled = false
+        lifecycleScope.launch {
+            try {
+                val res = withContext(Dispatchers.IO) { ApiClient.verifyComplete(verifyId, code) }
+                btnSubmitCode.isEnabled = true
+                if (res.optBoolean("ok") && res.has("token")) {
+                    stopVerifyPoll()
+                    SessionManager.save(this@LoginActivity, res.optString("token"), res.optString("username"), res.optString("role", "user"), res.optInt("id", 0))
+                    navigateToLobby(); return@launch
+                }
+                showError(res.optString("error", "Неверный код"))
+            } catch (e: Exception) { btnSubmitCode.isEnabled = true; showError("Ошибка: ${e.message}") }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        stopVerifyPoll()
     }
 
     private fun navigateToLobby() { startActivity(Intent(this, LobbyActivity::class.java)); finish() }
-    private fun showError(msg: String) { b.errorText.text = msg; b.errorText.visibility = View.VISIBLE; b.successText.visibility = View.GONE }
-    private fun showSuccess(msg: String) { b.successText.text = msg; b.successText.visibility = View.VISIBLE; b.errorText.visibility = View.GONE }
-    private fun hideError() { b.errorText.visibility = View.GONE }
-    private fun hideSuccess() { b.successText.visibility = View.GONE }
-    private fun setLoading(on: Boolean) { b.progressBar.visibility = if (on) View.VISIBLE else View.GONE; b.btnLogin.isEnabled = !on; b.btnRegister.isEnabled = !on }
+    private fun showError(msg: String) { errorText.text = msg; errorText.visibility = View.VISIBLE; successText.visibility = View.GONE }
+    private fun showSuccess(msg: String) { successText.text = msg; successText.visibility = View.VISIBLE; errorText.visibility = View.GONE }
+    private fun hideError() { errorText.visibility = View.GONE }
+    private fun setLoading(on: Boolean) { progressBar.visibility = if (on) View.VISIBLE else View.GONE; btnLogin.isEnabled = !on; btnRegister.isEnabled = !on }
 }
