@@ -21,7 +21,6 @@ import kotlinx.coroutines.withContext
 class MailFragment : Fragment() {
     private val handler = Handler(Looper.getMainLooper())
     private var running = false
-    private var pollRunnable: Runnable? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_mail, container, false)
@@ -36,7 +35,7 @@ class MailFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         running = false
-        pollRunnable?.let { handler.removeCallbacks(it) }
+        handler.removeCallbacksAndMessages(null)
     }
 
     private fun startPoll(v: View) {
@@ -45,30 +44,30 @@ class MailFragment : Fragment() {
         val token = SessionManager.token(ctx) ?: return
         val list = v.findViewById<LinearLayout>(R.id.mailList)
         val emptyText = v.findViewById<TextView>(R.id.mailEmpty)
+        poll(v, token, list, emptyText)
+    }
 
-        pollRunnable = Runnable {
-            lifecycleScope.launch {
-                try {
-                    val res = withContext(Dispatchers.IO) { ApiClient.verifyPending(token) }
-                    if (res.optBoolean("ok")) {
-                        val pending = res.optJSONArray("pending")
-                        list.removeAllViews()
-                        if (pending == null || pending.length() == 0) {
-                            emptyText.visibility = View.VISIBLE
-                        } else {
-                            emptyText.visibility = View.GONE
-                            for (i in 0 until pending.length()) {
-                                val item = pending.getJSONObject(i)
-                                val card = createMailCard(item, token, list)
-                                list.addView(card)
-                            }
+    private fun poll(v: View, token: String, list: LinearLayout, emptyText: TextView) {
+        if (!running) return
+        lifecycleScope.launch {
+            try {
+                val res = withContext(Dispatchers.IO) { ApiClient.verifyPending(token) }
+                if (isAdded && res.optBoolean("ok")) {
+                    val pending = res.optJSONArray("pending")
+                    list.removeAllViews()
+                    if (pending == null || pending.length() == 0) {
+                        emptyText.visibility = View.VISIBLE
+                    } else {
+                        emptyText.visibility = View.GONE
+                        for (i in 0 until pending.length()) {
+                            val item = pending.getJSONObject(i)
+                            list.addView(createMailCard(item, token, list))
                         }
                     }
-                } catch (_: Exception) {}
-                if (running) handler.postDelayed(this@Runnable, 5000)
-            }
+                }
+            } catch (_: Exception) {}
+            if (running && isAdded) handler.postDelayed({ poll(v, token, list, emptyText) }, 5000)
         }
-        handler.post(pollRunnable!!)
     }
 
     private fun createMailCard(item: org.json.JSONObject, token: String, list: LinearLayout): View {
