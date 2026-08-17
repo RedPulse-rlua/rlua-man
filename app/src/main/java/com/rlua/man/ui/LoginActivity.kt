@@ -25,7 +25,6 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var inputPassword: EditText
     private lateinit var inputCode: EditText
     private lateinit var errorText: TextView
-    private lateinit var successText: TextView
     private lateinit var progressBar: ProgressBar
     private lateinit var btnLogin: TextView
     private lateinit var btnRegister: TextView
@@ -45,7 +44,6 @@ class LoginActivity : AppCompatActivity() {
         inputPassword = findViewById(R.id.inputPassword)
         inputCode = findViewById(R.id.inputCode)
         errorText = findViewById(R.id.errorText)
-        successText = findViewById(R.id.successText)
         progressBar = findViewById(R.id.progressBar)
         btnLogin = findViewById(R.id.btnLogin)
         btnRegister = findViewById(R.id.btnRegister)
@@ -79,15 +77,11 @@ class LoginActivity : AppCompatActivity() {
             try {
                 val res = withContext(Dispatchers.IO) { ApiClient.login(u, w, p) }
                 setLoading(false)
-                if (!res.optBoolean("ok")) {
-                    showError(res.optString("error", "Ошибка")); return@launch
-                }
-                if (res.optBoolean("needsVerification")) {
-                    showVerifyScreen(res.optString("verifyId")); return@launch
-                }
+                if (!res.optBoolean("ok")) { showError(res.optString("error", "Ошибка")); return@launch }
+                if (res.optBoolean("needsVerification")) { showVerifyScreen(res.optString("verifyId")); return@launch }
                 SessionManager.save(this@LoginActivity, res.optString("token"), res.optString("username"), res.optString("role", "user"), res.optInt("id", 0))
-                navigateToLobby()
-            } catch (e: Exception) { setLoading(false); showError("Ошибка сети: ${e.message}") }
+                goMain()
+            } catch (e: Exception) { setLoading(false); showError("Ошибка: ${e.message}") }
         }
     }
 
@@ -103,8 +97,8 @@ class LoginActivity : AppCompatActivity() {
                 setLoading(false)
                 if (!res.optBoolean("ok")) { showError(res.optString("error", "Ошибка")); return@launch }
                 SessionManager.save(this@LoginActivity, res.optString("token"), res.optString("username"), res.optString("role", "user"), res.optInt("id", 0))
-                navigateToLobby()
-            } catch (e: Exception) { setLoading(false); showError("Ошибка сети: ${e.message}") }
+                goMain()
+            } catch (e: Exception) { setLoading(false); showError("Ошибка: ${e.message}") }
         }
     }
 
@@ -129,13 +123,10 @@ class LoginActivity : AppCompatActivity() {
                 if (res.optBoolean("ok") && res.has("token")) {
                     pollRunning = false
                     SessionManager.save(this@LoginActivity, res.optString("token"), res.optString("username"), res.optString("role", "user"), res.optInt("id", 0))
-                    navigateToLobby(); return@launch
+                    goMain(); return@launch
                 }
                 val err = res.optString("error", "")
-                if (err.contains("отклонён")) {
-                    pollRunning = false
-                    verifyStatus.text = "Вход отклонён владельцем аккаунта"; return@launch
-                }
+                if (err.contains("отклонён")) { pollRunning = false; verifyStatus.text = "Вход отклонён"; return@launch }
                 if (err.contains("нужен код") || err.contains("code")) {
                     pollRunning = false
                     verifyStatus.text = "Введите код из основного устройства"
@@ -155,20 +146,15 @@ class LoginActivity : AppCompatActivity() {
                 btnSubmitCode.isEnabled = true
                 if (res.optBoolean("ok") && res.has("token")) {
                     SessionManager.save(this@LoginActivity, res.optString("token"), res.optString("username"), res.optString("role", "user"), res.optInt("id", 0))
-                    navigateToLobby(); return@launch
+                    goMain(); return@launch
                 }
                 showError(res.optString("error", "Неверный код"))
             } catch (e: Exception) { btnSubmitCode.isEnabled = true; showError("Ошибка: ${e.message}") }
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        pollRunning = false
-    }
-
-    private fun navigateToLobby() { startActivity(Intent(this, LobbyActivity::class.java)); finish() }
-    private fun showError(msg: String) { errorText.text = msg; errorText.visibility = View.VISIBLE; successText.visibility = View.GONE }
-    private fun hideError() { errorText.visibility = View.GONE; successText.visibility = View.GONE }
+    private fun goMain() { startActivity(Intent(this, MainActivity::class.java)); finish() }
+    private fun showError(msg: String) { errorText.text = msg; errorText.visibility = View.VISIBLE }
+    private fun hideError() { errorText.visibility = View.GONE }
     private fun setLoading(on: Boolean) { progressBar.visibility = if (on) View.VISIBLE else View.GONE; btnLogin.isEnabled = !on; btnRegister.isEnabled = !on }
 }
