@@ -1,0 +1,38 @@
+name: Deploy rlua-man to Cloudflare Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate files
+        run: |
+          echo "Checking files..."
+          test -f index.html || exit 1
+          test -f manifest.json || exit 1
+          test -f sw.js || exit 1
+          test -f app/app.js || exit 1
+          test -f app/app.css || exit 1
+          echo "All files present"
+
+      - name: Validate JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('manifest.json','utf8')); console.log('manifest.json OK')"
+
+      - name: Validate JS syntax
+        run: |
+          node --check sw.js
+          node --check app/app.js
+          echo "JS syntax OK"
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          command: pages deploy . --project-name=rlua-man --branch=main
