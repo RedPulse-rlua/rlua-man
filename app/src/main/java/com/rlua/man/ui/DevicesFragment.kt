@@ -191,44 +191,42 @@ class DevicesFragment : Fragment() {
         }
 
         if (!isCurrent) {
-            val kickBtn = actionBtn(ctx, "ВЫГНАТЬ", "#3A2222").apply {
-                setOnClickListener {
-                    AlertDialog.Builder(ctx)
-                        .setTitle("Выгнать устройство")
-                        .setMessage("Сессия «$device» будет завершена. Устройству придётся входить заново. Продолжить?")
-                        .setPositiveButton("ВЫГНАТЬ") { _, _ ->
-                            kickBtn.isEnabled = false
-                            lifecycleScope.launch {
-                                try {
-                                    val r = withContext(Dispatchers.IO) { ApiClient.deviceKick(token, id) }
-                                    if (r.optBoolean("ok")) list.removeView(card)
-                                    else Toast.makeText(ctx, r.optString("error", "Ошибка"), Toast.LENGTH_SHORT).show()
-                                } catch (_: Exception) {}
-                            }
+            val kickBtn = actionBtn(ctx, "ВЫГНАТЬ", "#3A2222")
+            kickBtn.setOnClickListener {
+                AlertDialog.Builder(ctx)
+                    .setTitle("Выгнать устройство")
+                    .setMessage("Сессия «$device» будет завершена. Устройству придётся входить заново. Продолжить?")
+                    .setPositiveButton("ВЫГНАТЬ") { _, _ ->
+                        kickBtn.isEnabled = false
+                        lifecycleScope.launch {
+                            try {
+                                val r = withContext(Dispatchers.IO) { ApiClient.deviceKick(token, id) }
+                                if (r.optBoolean("ok")) list.removeView(card)
+                                else Toast.makeText(ctx, r.optString("error", "Ошибка"), Toast.LENGTH_SHORT).show()
+                            } catch (_: Exception) {}
                         }
-                        .setNegativeButton("Отмена", null)
-                        .show()
-                }
+                    }
+                    .setNegativeButton("Отмена", null)
+                    .show()
             }
             actions.addView(kickBtn)
 
-            val transferBtn = actionBtn(ctx, "ПЕРЕДАТЬ ПРАВА", "#FF2D2D").apply {
-                setOnClickListener {
-                    AlertDialog.Builder(ctx)
-                        .setTitle("Передать главное устройство")
-                        .setMessage("Устройство «$device» станет единственным, которое входит без кода. Все остальные, включая это, будут требовать код при входе. Продолжить?")
-                        .setPositiveButton("ПЕРЕДАТЬ") { _, _ ->
-                            transferBtn.isEnabled = false
-                            lifecycleScope.launch {
-                                try {
-                                    val r = withContext(Dispatchers.IO) { ApiClient.deviceTransfer(token, id) }
-                                    if (!r.optBoolean("ok")) Toast.makeText(ctx, r.optString("error", "Ошибка"), Toast.LENGTH_SHORT).show()
-                                } catch (_: Exception) {}
-                            }
+            val transferBtn = actionBtn(ctx, "ПЕРЕДАТЬ ПРАВА", "#FF2D2D")
+            transferBtn.setOnClickListener {
+                AlertDialog.Builder(ctx)
+                    .setTitle("Передать главное устройство")
+                    .setMessage("Устройство «$device» станет единственным, которое входит без кода. Все остальные, включая это, будут требовать код при входе. Продолжить?")
+                    .setPositiveButton("ПЕРЕДАТЬ") { _, _ ->
+                        transferBtn.isEnabled = false
+                        lifecycleScope.launch {
+                            try {
+                                val r = withContext(Dispatchers.IO) { ApiClient.deviceTransfer(token, id) }
+                                if (!r.optBoolean("ok")) Toast.makeText(ctx, r.optString("error", "Ошибка"), Toast.LENGTH_SHORT).show()
+                            } catch (_: Exception) {}
                         }
-                        .setNegativeButton("Отмена", null)
-                        .show()
-                }
+                    }
+                    .setNegativeButton("Отмена", null)
+                    .show()
             }
             actions.addView(transferBtn)
         } else {
