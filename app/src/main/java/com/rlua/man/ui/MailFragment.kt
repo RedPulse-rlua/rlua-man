@@ -66,7 +66,7 @@ class MailFragment : Fragment() {
                     }
                 }
             } catch (_: Exception) {}
-            if (running && isAdded) handler.postDelayed({ poll(v, token, list, emptyText) }, 5000)
+            if (running && isAdded) handler.postDelayed({ poll(v, token, list, emptyText) }, 3000)
         }
     }
 

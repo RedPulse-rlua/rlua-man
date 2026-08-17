@@ -134,7 +134,7 @@ class LoginActivity : AppCompatActivity() {
                 val err = res.optString("error", "")
                 if (err.contains("отклонён") || err.contains("заблокирован")) { pollRunning = false; verifyStatus.text = "Вход отклонён"; return@launch }
             } catch (_: Exception) {}
-            if (pollRunning) mainHandler.postDelayed({ pollVerify(verifyId) }, 3000)
+            if (pollRunning) mainHandler.postDelayed({ pollVerify(verifyId) }, 2000)
         }
     }
 
