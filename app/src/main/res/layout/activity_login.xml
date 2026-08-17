@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0A0A0F"
+    android:padding="24dp">
+
+    <TextView
+        android:id="@+id/logoText1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="rl"
+        android:textColor="#E8E8F0"
+        android:textSize="48sp"
+        android:textStyle="bold"
+        android:fontFamily="monospace"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/logoText2"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/logoText2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ua"
+        android:textColor="#6C5CE7"
+        android:textSize="48sp"
+        android:textStyle="bold"
+        android:fontFamily="monospace"
+        app:layout_constraintStart_toEndOf="@+id/logoText1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/logoText1"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/errorText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:textColor="#FF2B2B"
+        android:textSize="14sp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/logoText1"
+        tools:text="Error"
+        tools:visibility="visible" />
+
+    <TextView
+        android:id="@+id/successText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:textColor="#00E676"
+        android:textSize="14sp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/errorText"
+        tools:text="Success"
+        tools:visibility="visible" />
+
+    <LinearLayout
+        android:id="@+id/loginForm"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="24dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/successText"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilLoginUsername"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Имя пользователя"
+            app:boxBackgroundColor="#16161F"
+            app:boxStrokeColor="#2A2A38"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusBottomEnd="12dp"
+            app:hintTextColor="#606070"
+            app:hintEnabled="true"
+            app:startIconDrawable="@android:drawable/ic_menu_myplaces"
+            app:boxStrokeWidth="1dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/username"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E8E8F0"
+                android:textColorHint="#606070"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilLoginSecretWord"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Секретное слово"
+            app:boxBackgroundColor="#16161F"
+            app:boxStrokeColor="#2A2A38"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusBottomEnd="12dp"
+            app:hintTextColor="#606070"
+            app:passwordToggleEnabled="true"
+            app:passwordToggleTint="#606070"
+            app:startIconDrawable="@android:drawable/ic_lock_idle_lock"
+            app:boxStrokeWidth="1dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/secret_word"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E8E8F0"
+                android:textColorHint="#606070"
+                android:inputType="textPassword" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilLoginPassword"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Пароль"
+            app:boxBackgroundColor="#16161F"
+            app:boxStrokeColor="#2A2A38"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusBottomEnd="12dp"
+            app:hintTextColor="#606070"
+            app:passwordToggleEnabled="true"
+            app:passwordToggleTint="#606070"
+            app:startIconDrawable="@android:drawable/ic_lock_lock"
+            app:boxStrokeWidth="1dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E8E8F0"
+                android:textColorHint="#606070"
+                android:inputType="textPassword" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnLogin"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="16dp"
+            android:text="Войти"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:backgroundTint="#6C5CE7"
+            app:cornerRadius="12dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/switchToRegister"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="8dp"
+            android:text="Регистрация"
+            android:textAllCaps="false"
+            android:textColor="#E8E8F0"
+            android:textSize="14sp"
+            app:cornerRadius="12dp"
+            app:strokeColor="#2A2A38"
+            app:strokeWidth="1dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/registerForm"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="24dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/successText"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:visibility="visible">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilRegUsername"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Имя пользователя"
+            app:boxBackgroundColor="#16161F"
+            app:boxStrokeColor="#2A2A38"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusBottomEnd="12dp"
+            app:hintTextColor="#606070"
+            app:startIconDrawable="@android:drawable/ic_menu_myplaces"
+            app:boxStrokeWidth="1dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/regUsername"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E8E8F0"
+                android:textColorHint="#606070"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilRegSecretWord"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Секретное слово"
+            app:boxBackgroundColor="#16161F"
+            app:boxStrokeColor="#2A2A38"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusBottomEnd="12dp"
+            app:hintTextColor="#606070"
+            app:passwordToggleEnabled="true"
+            app:passwordToggleTint="#606070"
+            app:startIconDrawable="@android:drawable/ic_lock_idle_lock"
+            app:boxStrokeWidth="1dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/regSecretWord"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E8E8F0"
+                android:textColorHint="#606070"
+                android:inputType="textPassword" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilRegPassword"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Пароль"
+            app:boxBackgroundColor="#16161F"
+            app:boxStrokeColor="#2A2A38"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusBottomEnd="12dp"
+            app:hintTextColor="#606070"
+            app:passwordToggleEnabled="true"
+            app:passwordToggleTint="#606070"
+            app:startIconDrawable="@android:drawable/ic_lock_lock"
+            app:boxStrokeWidth="1dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/regPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E8E8F0"
+                android:textColorHint="#606070"
+                android:inputType="textPassword" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRegister"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="16dp"
+            android:text="Зарегистрироваться"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:backgroundTint="#6C5CE7"
+            app:cornerRadius="12dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSwitchToLogin"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="8dp"
+            android:text="Войти"
+            android:textAllCaps="false"
+            android:textColor="#E8E8F0"
+            android:textSize="14sp"
+            app:cornerRadius="12dp"
+            app:strokeColor="#2A2A38"
+            app:strokeWidth="1dp" />
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminateTint="#6C5CE7"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
