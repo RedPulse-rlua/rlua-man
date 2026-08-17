@@ -102,7 +102,7 @@ class LoginActivity : AppCompatActivity() {
                             showError("Вход отклонён"); return@launch
                         }
                     } catch (_: Exception) {}
-                    handler.postDelayed(this, 3000)
+                    handler.postDelayed(runnable, 3000)
                 }
             }
         }
