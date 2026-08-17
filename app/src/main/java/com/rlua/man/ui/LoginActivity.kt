@@ -89,24 +89,23 @@ class LoginActivity : AppCompatActivity() {
 
     private fun startVerifyPoll(verifyId: String) {
         val handler = android.os.Handler(mainLooper)
-        val runnable = object : Runnable {
-            override fun run() {
-                lifecycleScope.launch {
-                    try {
-                        val res = withContext(Dispatchers.IO) { ApiClient.verifyComplete(verifyId, "") }
-                        if (res.optBoolean("ok") && res.has("token")) {
-                            SessionManager.save(this@LoginActivity, res.optString("token"), res.optString("username"), res.optString("role", "user"), res.optInt("id", 0))
-                            navigateToLobby(); return@launch
-                        }
-                        if (res.optString("error", "").contains("отклонён")) {
-                            showError("Вход отклонён"); return@launch
-                        }
-                    } catch (_: Exception) {}
-                    handler.postDelayed(runnable, 3000)
-                }
+        lateinit var poll: Runnable
+        poll = Runnable {
+            lifecycleScope.launch {
+                try {
+                    val res = withContext(Dispatchers.IO) { ApiClient.verifyComplete(verifyId, "") }
+                    if (res.optBoolean("ok") && res.has("token")) {
+                        SessionManager.save(this@LoginActivity, res.optString("token"), res.optString("username"), res.optString("role", "user"), res.optInt("id", 0))
+                        navigateToLobby(); return@launch
+                    }
+                    if (res.optString("error", "").contains("отклонён")) {
+                        showError("Вход отклонён"); return@launch
+                    }
+                } catch (_: Exception) {}
+                handler.postDelayed(poll, 3000)
             }
         }
-        handler.post(runnable)
+        handler.post(poll)
     }
 
     private fun navigateToLobby() { startActivity(Intent(this, LobbyActivity::class.java)); finish() }
