@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/nav_lobby" android:icon="@drawable/ic_home" android:title="@string/tab_lobby" />
-    <item android:id="@+id/nav_files" android:icon="@drawable/ic_folder" android:title="@string/tab_files" />
-    <item android:id="@+id/nav_vizor" android:icon="@drawable/ic_vizor" android:title="@string/tab_vizor" />
-    <item android:id="@+id/nav_profile" android:icon="@drawable/ic_person" android:title="@string/tab_profile" />
-    <item android:id="@+id/nav_admin" android:icon="@drawable/ic_admin" android:title="@string/tab_admin" />
+    <item
+        android:id="@+id/nav_lobby"
+        android:icon="@drawable/ic_home"
+        android:title="Lobby" />
+    <item
+        android:id="@+id/nav_mail"
+        android:icon="@drawable/ic_mail"
+        android:title="Mail" />
 </menu>
