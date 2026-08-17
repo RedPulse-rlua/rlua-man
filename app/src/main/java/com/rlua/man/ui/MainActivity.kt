@@ -13,12 +13,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         b = ActivityMainBinding.inflate(layoutInflater)
         setContentView(b.root)
-        if (savedInstanceState == null) loadFragment(LobbyFragment())
+        if (savedInstanceState == null) loadFragment(MailFragment())
 
         b.bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_lobby -> { loadFragment(LobbyFragment()); true }
                 R.id.nav_mail -> { loadFragment(MailFragment()); true }
+                R.id.nav_devices -> { loadFragment(DevicesFragment()); true }
                 else -> false
             }
         }

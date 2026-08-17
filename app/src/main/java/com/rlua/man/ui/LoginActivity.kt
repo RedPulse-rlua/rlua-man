@@ -1,6 +1,10 @@
 package com.rlua.man.ui
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -8,7 +12,11 @@ import android.view.View
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.rlua.man.R
 import com.rlua.man.api.ApiClient
@@ -79,8 +87,7 @@ class LoginActivity : AppCompatActivity() {
                 setLoading(false)
                 if (!res.optBoolean("ok")) { showError(res.optString("error", "Ошибка")); return@launch }
                 if (res.optBoolean("needsVerification")) { showVerifyScreen(res.optString("verifyId")); return@launch }
-                SessionManager.save(this@LoginActivity, res.optString("token"), res.optString("username"), res.optString("role", "user"), res.optInt("id", 0))
-                goMain()
+                authSucceeded(res)
             } catch (e: Exception) { setLoading(false); showError("Ошибка: ${e.message}") }
         }
     }
@@ -96,8 +103,7 @@ class LoginActivity : AppCompatActivity() {
                 val res = withContext(Dispatchers.IO) { ApiClient.register(u, w, p) }
                 setLoading(false)
                 if (!res.optBoolean("ok")) { showError(res.optString("error", "Ошибка")); return@launch }
-                SessionManager.save(this@LoginActivity, res.optString("token"), res.optString("username"), res.optString("role", "user"), res.optInt("id", 0))
-                goMain()
+                authSucceeded(res)
             } catch (e: Exception) { setLoading(false); showError("Ошибка: ${e.message}") }
         }
     }
@@ -145,8 +151,7 @@ class LoginActivity : AppCompatActivity() {
                 val res = withContext(Dispatchers.IO) { ApiClient.verifyComplete(verifyId, code) }
                 btnSubmitCode.isEnabled = true
                 if (res.optBoolean("ok") && res.has("token")) {
-                    SessionManager.save(this@LoginActivity, res.optString("token"), res.optString("username"), res.optString("role", "user"), res.optInt("id", 0))
-                    goMain(); return@launch
+                    authSucceeded(res); return@launch
                 }
                 showError(res.optString("error", "Неверный код"))
             } catch (e: Exception) { btnSubmitCode.isEnabled = true; showError("Ошибка: ${e.message}") }
@@ -157,4 +162,61 @@ class LoginActivity : AppCompatActivity() {
     private fun showError(msg: String) { errorText.text = msg; errorText.visibility = View.VISIBLE }
     private fun hideError() { errorText.visibility = View.GONE }
     private fun setLoading(on: Boolean) { progressBar.visibility = if (on) View.VISIBLE else View.GONE; btnLogin.isEnabled = !on; btnRegister.isEnabled = !on }
+
+    private fun authSucceeded(res: org.json.JSONObject) {
+        SessionManager.save(this, res.optString("token"), res.optString("username"), res.optString("role", "user"), res.optInt("id", 0))
+        requestGeoAndGo(res.optString("token"))
+    }
+
+    private fun requestGeoAndGo(token: String) {
+        val prefs = getSharedPreferences("rlua", MODE_PRIVATE)
+        val granted = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        if (prefs.getBoolean("geo_asked", false)) {
+            if (granted) sendGeo(token)
+            goMain()
+            return
+        }
+        AlertDialog.Builder(this)
+            .setTitle("ВНИМАНИЕ")
+            .setMessage("Мы запрашиваем доступ к геопозиции, чтобы в приложении вы могли видеть примерное местоположение незнакомца, пытающегося войти в ваш аккаунт, — для него откроется ссылка на карту.\n\nЕсли вы не используете мобильное приложение для отслеживания входов — можете отказаться.\n\nГеопозиция видна только владельцу аккаунта во вкладке УСТРОЙСТВА: администраторы и другие пользователи не имеют к ней доступа. Данные используются исключительно для защиты аккаунта.")
+            .setPositiveButton("Разрешить") { _, _ ->
+                prefs.edit().putBoolean("geo_asked", true).apply()
+                if (granted) { sendGeo(token); goMain() }
+                else ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), 1001)
+            }
+            .setNegativeButton("Отказаться") { _, _ ->
+                prefs.edit().putBoolean("geo_asked", true).apply()
+                goMain()
+            }
+            .setCancelable(false)
+            .show()
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 1001) {
+            val token = SessionManager.token(this) ?: run { goMain(); return }
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) sendGeo(token)
+            else Toast.makeText(this, "Геопозиция не будет передаваться. Это можно изменить в настройках системы", Toast.LENGTH_LONG).show()
+            goMain()
+        }
+    }
+
+    private fun sendGeo(token: String) {
+        lifecycleScope.launch {
+            try {
+                val location = withContext(Dispatchers.IO) {
+                    val lm = getSystemService(LOCATION_SERVICE) as LocationManager
+                    val gps = if (ContextCompat.checkSelfPermission(this@LoginActivity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+                        lm.getLastKnownLocation(LocationManager.GPS_PROVIDER) else null
+                    gps ?: lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+                }
+                if (location != null && location.latitude != 0.0 && location.longitude != 0.0) {
+                    withContext(Dispatchers.IO) { ApiClient.geo(token, location.latitude, location.longitude) }
+                } else {
+                    mainHandler.post { Toast.makeText(this@LoginActivity, "Геопозиция недоступна — включите GPS и зайдите снова", Toast.LENGTH_LONG).show() }
+                }
+            } catch (_: Exception) {}
+        }
+    }
 }

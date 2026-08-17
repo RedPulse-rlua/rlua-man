@@ -33,11 +33,17 @@ object ApiClient {
         return JSONObject(client.newCall(builder.build()).execute().body?.string() ?: "{}")
     }
 
-    fun login(username: String, word: String, password: String) =
-        post("/api/login", JSONObject().apply { put("username", username); put("word", word); put("password", password) })
+    fun login(username: String, word: String, password: String, lat: Double? = null, lon: Double? = null) =
+        post("/api/login", JSONObject().apply {
+            put("username", username); put("word", word); put("password", password)
+            if (lat != null && lon != null) { put("lat", lat); put("lon", lon) }
+        })
 
-    fun register(username: String, word: String, password: String) =
-        post("/api/register", JSONObject().apply { put("username", username); put("word", word); put("password", password) })
+    fun register(username: String, word: String, password: String, lat: Double? = null, lon: Double? = null) =
+        post("/api/register", JSONObject().apply {
+            put("username", username); put("word", word); put("password", password)
+            if (lat != null && lon != null) { put("lat", lat); put("lon", lon) }
+        })
 
     fun me(token: String) = get("/api/me", token)
     fun logout(token: String) = post("/api/logout", JSONObject(), token)
@@ -47,4 +53,9 @@ object ApiClient {
         post("/api/verify/confirm", JSONObject().apply { put("id", id); put("action", action); if (code != null) put("code", code) }, token)
     fun verifyComplete(id: String, code: String) =
         post("/api/verify/complete", JSONObject().apply { put("id", id); put("code", code) })
+    fun geo(token: String, lat: Double, lon: Double) =
+        post("/api/geo", JSONObject().apply { put("lat", lat); put("lon", lon) }, token)
+    fun devices(token: String) = get("/api/devices", token)
+    fun deviceKick(token: String, id: String) = post("/api/devices/kick", JSONObject().put("id", id), token)
+    fun deviceTransfer(token: String, id: String) = post("/api/devices/transfer", JSONObject().put("id", id), token)
 }
