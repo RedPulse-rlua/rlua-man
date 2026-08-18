@@ -87,6 +87,7 @@ class DevicesFragment : Fragment() {
         val ip = item.optString("ip", "")
         val isCurrent = item.optBoolean("current")
         val isMaster = item.optBoolean("master")
+        val canManage = item.optBoolean("canManage")
         val lat = if (item.has("lat") && !item.isNull("lat")) item.optDouble("lat", Double.NaN) else Double.NaN
         val lon = if (item.has("lon") && !item.isNull("lon")) item.optDouble("lon", Double.NaN) else Double.NaN
         val ipLat = if (item.has("ipLat") && !item.isNull("ipLat")) item.optDouble("ipLat", Double.NaN) else Double.NaN
@@ -190,7 +191,7 @@ class DevicesFragment : Fragment() {
             actions.addView(mapBtn)
         }
 
-        if (!isCurrent) {
+        if (canManage) {
             val kickBtn = actionBtn(ctx, "ВЫГНАТЬ", "#3A2222")
             kickBtn.setOnClickListener {
                 AlertDialog.Builder(ctx)
@@ -229,8 +230,8 @@ class DevicesFragment : Fragment() {
                     .show()
             }
             actions.addView(transferBtn)
-        } else {
-            val meBtn = actionBtn(ctx, "ЭТО ВЫ", "#3A2222")
+        } else if (isCurrent && !isMaster) {
+            val meBtn = actionBtn(ctx, "УПРАВЛЕНИЕ С ГЛАВНОГО", "#3A2222")
             actions.addView(meBtn)
         }
 
